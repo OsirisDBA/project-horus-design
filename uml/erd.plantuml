@@ -2,10 +2,14 @@
 
 ' hide the spot
 hide circle
+hide empty members
 
 ' avoid problems with angled crows feet
 skinparam linetype ortho
 
+
+
+' Entities
 entity "Metric" as metric {
   *MetridID : int <<generated>>
   --
@@ -17,6 +21,8 @@ entity "Metric" as metric {
   *OutputCreate : nvarchar(max)
   *StartDate : datetimeoffset
   *Enabled : bit
+  --
+  Check(Frequency > 0)
 }
 note left
   Contains all information needed to setup 
@@ -30,13 +36,40 @@ entity "Schedule" as schedule {
   RunStart : datetimeoffset
   RunEnd : datetimeoffset
   RunDuration : int <<computed>> <<persisted>>
-  *RunStatus : tinyint 
+  *RunStatus : RunStatus 
   Message : nvarchar(max) 
+  --
+  PK(SchedStart,MetricID)
+  Index(MetricID)
 }
 note left
 Every collection of a metric is a new schedule
 end note
 
+' domains
+enum "RunStatus" as runstat {
+0 : SCHEDULED 
+1 : RUNNING
+2 : SUCCESS
+3 : FAILURE
+}
+
+' stored procedures
+class "Stored Procedures" << sp_container >>  {
+--metric--
+    AddMetric(MetridID, Name, Description, QueryText, Frequency, OutputTableName, OutputCreate, StartDate, Enabled ) : MetricID
+    UpdateMetric(MetridID, Name, Description, QueryText, Frequency, OutputTableName, OutputCreate, StartDate, Enabled ) : void
+    RemoveMetric(MetricID) : void
+    CollectMetric(MetricID) : void
+
+--collection--
+    GetScheduled() 
+    CollectMetrics()
+
+--helpers--
+}
+
+' Relationships
 metric ||--o{ schedule : Has >
 
 @enduml
