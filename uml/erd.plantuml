@@ -1,0 +1,42 @@
+@startuml
+
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "Metric" as metric {
+  *MetridID : int <<generated>>
+  --
+  *Name : sysname
+  Description : nvarchar(2000)
+  *QueryText : nvarchar(max)
+  *Frequency : int
+  *OutputTableName : sysname
+  *OutputCreate : nvarchar(max)
+  *StartDate : datetimeoffset
+  *Enabled : bit
+}
+note left
+  Contains all information needed to setup 
+    and schedule the collection of a metric
+end note
+
+entity "Schedule" as schedule {
+  *MetridID : number <<FK>>
+  *SchedStart : datetimeoffset
+  --
+  RunStart : datetimeoffset
+  RunEnd : datetimeoffset
+  RunDuration : int <<computed>> <<persisted>>
+  *RunStatus : tinyint 
+  Message : nvarchar(max) 
+}
+note left
+Every collection of a metric is a new schedule
+end note
+
+metric ||--o{ schedule : Has >
+
+@enduml
