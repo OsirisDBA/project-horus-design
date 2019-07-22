@@ -1,0 +1,30 @@
+@startuml
+
+' hide the spot
+' hide circle
+hide empty members
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+
+' domains
+enum "RunStatus" {
+0 : SCHEDULED 
+1 : RUNNING
+2 : SUCCESS
+3 : FAILURE
+}
+
+enum "SQLVersion" {
+9 : 2005
+10 : 2008
+11 : 2012
+12 : 2014
+13 : 2016
+14 : 2017
+15 : 2019
+}
+
+
+@enduml

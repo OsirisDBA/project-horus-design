@@ -11,22 +11,51 @@ skinparam linetype ortho
 
 ' Entities
 entity "Metric" as metric {
-  *MetridID : int <<generated>>
+  *MetricID : int <<generated>>
   --
   *Name : sysname
   Description : nvarchar(2000)
-  *QueryText : nvarchar(max)
   *Frequency : int
-  *OutputTableName : sysname
-  *OutputCreate : nvarchar(max)
+  *ResultTable : sysname
   *StartDate : datetimeoffset
   *Enabled : bit
   --
   Check(Frequency > 0)
 }
-note left
+note top
   Contains all information needed to setup 
     and schedule the collection of a metric
+end note
+
+entity "MetricQuery" as metricquery {
+  *MetricID : int <<fk>
+  *QueryID : int <<fk>>
+  *SQLVersion ⬅ SERVERPROPERTY('ProductMajorVersion')
+}
+note bottom
+  Many versions could share the same query.
+end note
+
+entity "Query" as query {
+  *QueryID : int <<generated>>
+  --
+  *SelectStmt : nvarchar(max)
+}
+note top
+  The collection query could be slightly different 
+    for each version of SQL Server
+end note
+
+entity "MetricResult" as metricresult {
+  *MetricID : int <<fk>>
+  *SQLVersion : SQLVersion
+  --
+  *CreateStmt : nvarchar(max)
+}
+note bottom
+  Usually the result table will be the same
+    for each version. Future proofing this
+    by allowing possibly different table definitions.
 end note
 
 entity "Schedule" as schedule {
@@ -39,37 +68,17 @@ entity "Schedule" as schedule {
   *RunStatus : RunStatus 
   Message : nvarchar(max) 
   --
-  PK(SchedStart,MetricID)
-  Index(MetricID)
+  PrimaryKey( SchedStart, MetricID )
+  Index( MetricID )
 }
-note left
+note top
 Every collection of a metric is a new schedule
 end note
 
-' domains
-enum "RunStatus" as runstat {
-0 : SCHEDULED 
-1 : RUNNING
-2 : SUCCESS
-3 : FAILURE
-}
-
-' stored procedures
-class "Stored Procedures" << sp_container >>  {
---metric--
-    AddMetric(MetridID, Name, Description, QueryText, Frequency, OutputTableName, OutputCreate, StartDate, Enabled ) : MetricID
-    UpdateMetric(MetridID, Name, Description, QueryText, Frequency, OutputTableName, OutputCreate, StartDate, Enabled ) : void
-    RemoveMetric(MetricID) : void
-    CollectMetric(MetricID) : void
-
---collection--
-    GetScheduled() 
-    CollectMetrics()
-
---helpers--
-}
-
 ' Relationships
-metric ||--o{ schedule : Has >
+metric ||--o{ schedule 
+metric ||--o{ metricquery 
+metric ||--o{ metricresult 
+query ||--o{ metricquery 
 
 @enduml

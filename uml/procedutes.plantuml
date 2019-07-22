@@ -1,0 +1,97 @@
+@startuml
+
+hide circle
+hide empty members
+
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+
+
+' stored procedures
+class StoredProcedures << sp_container >>  {
+--metric--
+  AddMetricQuery(MetricID, SQLVersion, QueryText) : void
+  UpdateMetricQuery(MetricID, SQLVersion, QueryText) : void
+  RemoveMetricQuery(MetricID, SQLVersion) : void
+  AddMetricQuery(MetricID, SQLVersion, QueryText) : void
+  UpdateMetricQuery(MetricID, SQLVersion, QueryText) : void
+  RemoveMetricQuery(MetricID, SQLVersion) : void
+  CollectMetric(MetricID) : void
+  
+--collection--
+    GetScheduled() 
+    CollectMetrics()
+}
+
+' Metric
+package "Metric" {
+    class AddMetric {
+        *MetricID : int
+        *Name : sysname
+        Description : nvarchar(2000) ⬅ <<null>>
+        *Frequency : int 
+        *ResultTable : sysname
+        StartDate : datetimeoffset ⬅ sysdatetimeoffset()
+        Enabled : bit ⬅ 1
+        --resultset--
+        MetricID : int
+    }
+    note bottom
+        Adds a metric to the system
+    end note
+
+    class UpdateMetric {
+        *MetricID : int
+        Name : sysname ⬅ <<null>>
+        Description : nvarchar(2000) ⬅ <<null>>
+        Frequency : int  ⬅ <<null>>
+        ResultTable : sysname  ⬅ <<null>>
+        StartDate : datetimeoffset ⬅ <<null>>
+        Enabled : bit  ⬅ <<null>>
+    }
+    note bottom
+        Updates a property of a metric. 
+          Only non-null parameters will be updated.
+    end note
+
+    class RemoveMetric {
+        *MetricID : int
+    }
+    note bottom
+        Removes a metric, it's queries, 
+          schedules, etc. from the system
+    end note
+}
+
+' MetricQuery
+package "MetricQuery" {
+    class AddMetricQuery {
+        *MetricID 
+        SQLVersion ⬅ SERVERPROPERTY('ProductMajorVersion')
+        *QueryText
+        --resultset--
+        MetricID : int
+        SQLVersion : SQLVersion
+    }
+    note bottom
+        Adds the metric query required for each version
+    end note
+
+    class UpdateMetricQuery {
+        *MetricID 
+        SQLVersion ⬅ SERVERPROPERTY('ProductMajorVersion')
+        *QueryText
+        --resultset--
+        MetricID : int
+        SQLVersion : SQLVersion
+    }
+    class RemoveMetricQuery {
+        *MetricID 
+        SQLVersion ⬅ SERVERPROPERTY('ProductMajorVersion')
+    }
+}
+
+hide StoredProcedures
+@enduml
