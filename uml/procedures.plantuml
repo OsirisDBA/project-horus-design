@@ -27,20 +27,7 @@ class StoredProcedures << sp_container >>  {
 
 ' Metric
 package "Metric" {
-    class AddMetric {
-        *MetricID : int
-        *Name : sysname
-        Description : nvarchar(2000) ⬅ <<null>>
-        *Frequency : int 
-        *ResultTable : sysname
-        StartDate : datetimeoffset ⬅ sysdatetimeoffset()
-        Enabled : bit ⬅ 1
-        --resultset--
-        MetricID : int
-    }
-    note bottom
-        Adds a metric to the system
-    end note
+    
 
     class UpdateMetric {
         *MetricID : int

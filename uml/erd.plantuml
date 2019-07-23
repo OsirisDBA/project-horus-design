@@ -16,7 +16,6 @@ entity "Metric" as metric {
   *Name : sysname
   Description : nvarchar(2000)
   *Frequency : int
-  *ResultTable : sysname
   *StartDate : datetimeoffset
   *Enabled : bit
   --
@@ -48,14 +47,12 @@ end note
 
 entity "MetricResult" as metricresult {
   *MetricID : int <<fk>>
-  *SQLVersion : SQLVersion
   --
+  *ResultTable : sysname
   *CreateStmt : nvarchar(max)
 }
 note bottom
-  Usually the result table will be the same
-    for each version. Future proofing this
-    by allowing possibly different table definitions.
+  The result table will be the same for each version. 
 end note
 
 entity "Schedule" as schedule {
@@ -74,6 +71,23 @@ entity "Schedule" as schedule {
 note top
 Every collection of a metric is a new schedule
 end note
+
+class "InstanceMetrics" <<view>> {
+  *MetricID : int
+  --
+  Name
+  Description
+  Frequency
+  LastRunStatus
+  LastRunDate
+  LastRunDuration
+  LastRunMessage
+  NextRunDate
+  --conditions--
+  StartDate > sysdatetimeoffset()
+  Enabled = 1
+  SQLVersion = SERVERPROPERTY('ProductMajorVersion')
+}
 
 ' Relationships
 metric ||--o{ schedule 

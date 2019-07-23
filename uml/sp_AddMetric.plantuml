@@ -1,0 +1,25 @@
+@startuml
+
+hide circle
+hide empty members
+
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+class AddMetric {
+    *MetricID : int
+    *Name : sysname
+    Description : nvarchar(2000) ⬅ <<
+    *Frequency : int 
+    *ResultTable : sysname
+    StartDate : datetimeoffset ⬅ sysdatetimeoffset()
+    Enabled : bit ⬅ 1
+    --resultset--
+    MetricID : int
+}
+note bottom
+    Adds a metric to the system
+end note
+
+
+@enduml
